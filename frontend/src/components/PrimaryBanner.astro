@@ -1,0 +1,267 @@
+---
+import type {
+	PrimaryBannerContent,
+	PrimaryBannerImageAsset,
+} from '../data/primary-banner';
+
+type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+type HeadingTag = `h${HeadingLevel}`;
+
+interface Props extends PrimaryBannerContent {
+	headingLevel?: HeadingLevel;
+	class?: string;
+	imageLoading?: 'eager' | 'lazy';
+	imageFetchPriority?: 'high' | 'low';
+}
+
+const {
+	productName,
+	supportingCopy,
+	ctaLabel,
+	ctaHref,
+	productImage,
+	productImageAlt,
+	ctaAriaLabel,
+	headingLevel = 2,
+	class: className,
+	imageLoading = 'lazy',
+	imageFetchPriority,
+} = Astro.props;
+
+if (imageLoading === 'lazy' && imageFetchPriority === 'high') {
+	throw new Error(
+		'PrimaryBanner: imageFetchPriority="high" requires imageLoading="eager".',
+	);
+}
+
+const Heading = `h${headingLevel}` as HeadingTag;
+const responsiveImageSources = [
+	productImage,
+	productImage.sources?.tablet,
+	productImage.sources?.desktop,
+]
+	.filter((source): source is PrimaryBannerImageAsset => Boolean(source))
+	.sort((first, second) => first.width - second.width);
+const imageSrcset =
+	responsiveImageSources.length > 1
+		? responsiveImageSources.map(({ src, width }) => `${src} ${width}w`).join(', ')
+		: undefined;
+const imageSizes = imageSrcset
+	? '(min-width: 63rem) 25.625rem, (min-width: 48rem) 12.3125rem, 10.75rem'
+	: undefined;
+---
+
+<section class:list={['primary-banner', className]}>
+	<div class="primary-banner__layout">
+		<img
+			class="primary-banner__rings"
+			src="/assets/home/desktop/pattern-circles.svg"
+			width="944"
+			height="944"
+			alt=""
+			aria-hidden="true"
+		/>
+
+		<div class="primary-banner__content">
+			<Heading class="primary-banner__heading">{productName}</Heading>
+			<p class="primary-banner__copy">{supportingCopy}</p>
+			<a class="primary-banner__cta" href={ctaHref} aria-label={ctaAriaLabel}>
+				{ctaLabel}
+			</a>
+		</div>
+
+		<picture class="primary-banner__media">
+			<img
+				class="primary-banner__image"
+				src={productImage.src}
+				srcset={imageSrcset}
+				sizes={imageSizes}
+				width={productImage.width}
+				height={productImage.height}
+				alt={productImageAlt}
+				loading={imageLoading}
+				decoding="async"
+				fetchpriority={imageFetchPriority}
+			/>
+		</picture>
+	</div>
+</section>
+
+<style>
+	.primary-banner {
+		container: primary-banner / inline-size;
+		inline-size: 100%;
+		font-family: var(--font-family-sans);
+		font-size-adjust: from-font;
+	}
+
+	.primary-banner__layout {
+		--banner-min-block-size: 37.5rem;
+		--image-width: 10.75rem;
+		--image-block-start: 3.4375rem;
+		--image-inline-start: 50%;
+		--image-translate-x: -50%;
+		--rings-size: 34.875rem;
+		--rings-block-start: -7.5625rem;
+		--rings-inline-start: 50%;
+		--rings-translate-x: -50%;
+		--content-block-start: 18.375rem;
+		--content-block-end: 3.4375rem;
+		--content-inline-size: 17.5rem;
+		--heading-inline-size: 15rem;
+		--heading-font-size: 2.25rem;
+		--heading-line-height: 2.5rem;
+		--heading-letter-spacing: 0.080625rem;
+		--heading-copy-gap: 1.5rem;
+		--copy-cta-gap: 1.5rem;
+
+		position: relative;
+		isolation: isolate;
+		min-block-size: var(--banner-min-block-size);
+		overflow: hidden;
+		border-radius: var(--radius-card);
+		background: var(--color-primary);
+		color: var(--color-white);
+	}
+
+	.primary-banner__rings {
+		position: absolute;
+		z-index: 0;
+		inset-block-start: var(--rings-block-start);
+		inset-inline-start: var(--rings-inline-start);
+		display: block;
+		inline-size: var(--rings-size);
+		max-inline-size: none;
+		block-size: auto;
+		transform: translateX(var(--rings-translate-x));
+		pointer-events: none;
+		user-select: none;
+	}
+
+	.primary-banner__content {
+		position: relative;
+		z-index: 2;
+		display: flex;
+		inline-size: min(calc(100% - 2rem), var(--content-inline-size));
+		min-block-size: var(--banner-min-block-size);
+		flex-direction: column;
+		align-items: center;
+		margin-inline: auto;
+		padding-block: var(--content-block-start) var(--content-block-end);
+		text-align: center;
+	}
+
+	.primary-banner__heading {
+		inline-size: var(--heading-inline-size);
+		max-inline-size: 100%;
+		margin: 0;
+		color: var(--color-white);
+		font-size: var(--heading-font-size);
+		font-weight: var(--font-weight-bold);
+		line-height: var(--heading-line-height);
+		letter-spacing: var(--heading-letter-spacing);
+		text-transform: uppercase;
+		overflow-wrap: anywhere;
+	}
+
+	.primary-banner__copy {
+		margin: var(--heading-copy-gap) 0 0;
+		color: rgb(255 255 255 / 75%);
+		font-size: 0.9375rem;
+		font-weight: var(--font-weight-medium);
+		line-height: 1.5625rem;
+	}
+
+	.primary-banner__cta {
+		display: inline-flex;
+		inline-size: 10rem;
+		max-inline-size: 100%;
+		block-size: 3rem;
+		flex: 0 0 auto;
+		align-items: center;
+		justify-content: center;
+		margin-block-start: var(--copy-cta-gap);
+		background: var(--color-black);
+		color: var(--color-white);
+		font-size: 0.8125rem;
+		font-weight: var(--font-weight-bold);
+		line-height: 1;
+		letter-spacing: 0.0625rem;
+		text-decoration: none;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.primary-banner__cta:is(:hover, :focus-visible, :active) {
+		background: #4c4c4c;
+	}
+
+	.primary-banner__cta:focus-visible {
+		outline: var(--focus-ring-width) solid var(--focus-ring-color-light);
+		outline-offset: var(--focus-ring-offset);
+	}
+
+	.primary-banner__media {
+		position: absolute;
+		z-index: 1;
+		inset-block-start: var(--image-block-start);
+		inset-inline-start: var(--image-inline-start);
+		display: block;
+		inline-size: var(--image-width);
+		transform: translateX(var(--image-translate-x));
+		pointer-events: none;
+		user-select: none;
+	}
+
+	.primary-banner__image {
+		display: block;
+		inline-size: 100%;
+		max-inline-size: none;
+		block-size: auto;
+	}
+
+	@container primary-banner (min-width: 43rem) {
+		.primary-banner__layout {
+			--banner-min-block-size: 45rem;
+			--image-width: 12.3125rem;
+			--image-block-start: 3.25rem;
+			--rings-size: 59rem;
+			--rings-block-start: -18rem;
+			--content-block-start: 22.0625rem;
+			--content-block-end: 4rem;
+			--content-inline-size: 21.8125rem;
+			--heading-inline-size: 100%;
+			--heading-font-size: 3.5rem;
+			--heading-line-height: 3.625rem;
+			--heading-letter-spacing: 0.125rem;
+			--copy-cta-gap: 2.5rem;
+		}
+	}
+
+	@container primary-banner (min-width: 58rem) {
+		.primary-banner__layout {
+			--banner-min-block-size: 35rem;
+			--image-width: 25.625rem;
+			--image-block-start: 6rem;
+			--image-inline-start: 10.54%;
+			--image-translate-x: 0;
+			--rings-block-start: -2.25rem;
+			--rings-inline-start: -9.3125rem;
+			--rings-translate-x: 0;
+			--content-block-start: 8.3125rem;
+			--content-block-end: 7.75rem;
+		}
+
+		.primary-banner__content {
+			align-items: flex-start;
+			margin-inline: 60% 0;
+			text-align: start;
+		}
+	}
+
+	@media (forced-colors: active) {
+		.primary-banner__cta:focus-visible {
+			outline-color: Highlight;
+		}
+	}
+</style>

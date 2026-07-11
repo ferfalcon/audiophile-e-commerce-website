@@ -1,11 +1,47 @@
 ---
-import Welcome from '../components/Welcome.astro';
+import CategoryBanner from '../components/CategoryBanner.astro';
+import PrimaryBanner from '../components/PrimaryBanner.astro';
+import { categoryBannerItems } from '../data/category-banner';
+import { primaryBannerReference } from '../data/primary-banner';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Audiophile">
+	<main class="home">
+		<h1 class="visually-hidden">Audiophile products</h1>
+		<div class="site-container home__content">
+			<CategoryBanner items={categoryBannerItems} imageLoading="eager" />
+			<PrimaryBanner {...primaryBannerReference} headingLevel={2} />
+		</div>
+	</main>
 </Layout>
+
+<style>
+	.home {
+		min-block-size: 100vh;
+		padding-block: 2rem;
+	}
+
+	.home__content {
+		display: grid;
+		gap: 6rem;
+	}
+
+	.visually-hidden {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		border: 0;
+		white-space: nowrap;
+	}
+
+	@media (min-width: 64rem) {
+		.home__content {
+			gap: 10.5rem;
+		}
+	}
+</style>
