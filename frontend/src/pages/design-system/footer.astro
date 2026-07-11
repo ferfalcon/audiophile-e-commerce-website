@@ -1,0 +1,38 @@
+---
+import SiteFooter from '../../components/SiteFooter.astro';
+import { siteFooterContent } from '../../data/footer';
+import Layout from '../../layouts/Layout.astro';
+
+const reviewContent = {
+	...siteFooterContent,
+	navigation: siteFooterContent.navigation.map((item) => ({
+		...item,
+		current: item.label === 'Headphones',
+	})),
+};
+---
+
+<Layout title="Footer | Audiophile design system">
+	<main class="footer-review__main">
+		<h1 class="visually-hidden">Audiophile site footer</h1>
+	</main>
+	<SiteFooter {...reviewContent} />
+</Layout>
+
+<style>
+	.footer-review__main {
+		block-size: 0;
+	}
+
+	.visually-hidden {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		border: 0;
+		white-space: nowrap;
+	}
+</style>

@@ -1,4 +1,21 @@
 ---
+import SiteFooter from '../components/SiteFooter.astro';
+import Welcome from '../components/Welcome.astro';
+import { siteFooterContent } from '../data/footer';
+import Layout from '../layouts/Layout.astro';
+
+const homeFooterContent = {
+	...siteFooterContent,
+	navigation: siteFooterContent.navigation.map((item) => ({
+		...item,
+		current: item.href === '/',
+	})),
+};
+---
+
+<Layout title="Audiophile">
+	<Welcome />
+	<SiteFooter {...homeFooterContent} />
 import SecondaryProductBanner from '../components/SecondaryProductBanner.astro';
 import { secondaryProductBannerReference } from '../data/secondary-product-banner';
 import Layout from '../layouts/Layout.astro';
