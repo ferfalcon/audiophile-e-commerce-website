@@ -1,0 +1,25 @@
+---
+import CategoryBanner from '../../components/CategoryBanner.astro';
+import { categoryBannerItems } from '../../data/category-banner';
+import Layout from '../../layouts/Layout.astro';
+
+const reviewItems = categoryBannerItems.map((item) => ({
+	...item,
+	current: item.name === 'Speakers',
+}));
+---
+
+<Layout title="Category banner | Audiophile design system">
+	<main class="category-banner-review">
+		<div class="site-container">
+			<CategoryBanner items={reviewItems} />
+		</div>
+	</main>
+</Layout>
+
+<style>
+	.category-banner-review {
+		min-block-size: 100vh;
+		padding-block: 2rem;
+	}
+</style>
