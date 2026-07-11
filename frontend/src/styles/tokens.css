@@ -1,0 +1,22 @@
+:root {
+	--font-family-sans: 'Manrope', Arial, sans-serif;
+	--font-weight-medium: 500;
+	--font-weight-bold: 700;
+	--color-primary: #d87d4a;
+	--color-black: #000;
+	--color-page: #fafafa;
+	--color-white: #fff;
+	--color-surface-dark: #101010;
+	--color-text-on-dark-muted: rgb(255 255 255 / 50%);
+	--container-max: 69.375rem;
+	--container-gutter: 1.5rem;
+	--focus-ring-color-dark: #fff;
+	--focus-ring-width: 0.1875rem;
+	--focus-ring-offset: 0.25rem;
+}
+
+@media (min-width: 48rem) {
+	:root {
+		--container-gutter: 2.46875rem;
+	}
+}
