@@ -1,0 +1,33 @@
+---
+import PrimaryBanner from '../../components/PrimaryBanner.astro';
+import { primaryBannerReference } from '../../data/primary-banner';
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Primary banner | Audiophile design system">
+	<main class="primary-banner-review">
+		<h1 class="visually-hidden">Primary banner</h1>
+		<div class="site-container">
+			<PrimaryBanner {...primaryBannerReference} headingLevel={2} />
+		</div>
+	</main>
+</Layout>
+
+<style>
+	.primary-banner-review {
+		min-block-size: 100vh;
+		padding-block: 2rem;
+	}
+
+	.visually-hidden {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		border: 0;
+		white-space: nowrap;
+	}
+</style>
