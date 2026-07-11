@@ -1,4 +1,9 @@
 :root {
+	--font-family-sans: 'Manrope', Arial, sans-serif;
+	--font-weight-medium: 500;
+	--font-weight-bold: 700;
+	--color-primary: #d87d4a;
+	--color-primary-text: #ad521b;
 	--color-black: #000;
 	--color-white: #fff;
 	--color-surface-muted: #f1f1f1;
@@ -12,4 +17,16 @@
 	--focus-ring-width: 0.1875rem;
 	--focus-ring-offset: 0.1875rem;
 	--focus-ring-color-light: #000;
+	--radius-card: 0.5rem;
+	--container-max: 69.375rem;
+	--container-gutter: 1.5rem;
+	--focus-ring-color-light: #000;
+	--focus-ring-width: 0.1875rem;
+	--focus-ring-offset: 0.25rem;
+}
+
+@media (min-width: 48rem) {
+	:root {
+		--container-gutter: 2.46875rem;
+	}
 }
