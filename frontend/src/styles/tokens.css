@@ -8,6 +8,15 @@
 	--color-white: #fff;
 	--color-surface-muted: #f1f1f1;
 	--color-page: #fafafa;
+	--font-family-sans: 'Manrope', sans-serif;
+	--font-weight-bold: 700;
+	--radius-card: 0.5rem;
+	--container-max: 69.375rem;
+	--container-gutter-mobile: 1.5rem;
+	--container-gutter-tablet: 2.46875rem;
+	--focus-ring-width: 0.1875rem;
+	--focus-ring-offset: 0.1875rem;
+	--focus-ring-color-light: #000;
 	--radius-card: 0.5rem;
 	--container-max: 69.375rem;
 	--container-gutter: 1.5rem;

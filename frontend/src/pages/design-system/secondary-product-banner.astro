@@ -1,0 +1,38 @@
+---
+import SecondaryProductBanner from '../../components/SecondaryProductBanner.astro';
+import { secondaryProductBannerReference } from '../../data/secondary-product-banner';
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+	title="Secondary product banner | Audiophile design system"
+	description="Isolated review route for the Audiophile secondary product banner"
+>
+	<main class="secondary-product-banner-review">
+		<h1 class="visually-hidden">Secondary product banner</h1>
+		<div class="site-container">
+			<SecondaryProductBanner {...secondaryProductBannerReference} headingLevel={2} />
+		</div>
+	</main>
+</Layout>
+
+<style>
+	.secondary-product-banner-review {
+		display: grid;
+		align-items: center;
+		min-block-size: 100vh;
+		padding-block: 3rem;
+	}
+
+	.visually-hidden {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
+	}
+</style>

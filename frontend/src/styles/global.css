@@ -23,6 +23,21 @@ html {
 }
 
 body {
+	min-block-size: 100vh;
+	margin: 0;
+}
+
+picture,
+img {
+	display: block;
+}
+
+img {
+	max-inline-size: 100%;
+}
+
+a {
+	color: inherit;
 	min-block-size: 100%;
 	margin: 0;
 	background: var(--color-page);
@@ -33,8 +48,18 @@ body {
 
 .site-container {
 	inline-size: min(
+		calc(100% - (2 * var(--container-gutter-mobile))),
 		calc(100% - var(--container-gutter) - var(--container-gutter)),
 		var(--container-max)
 	);
 	margin-inline: auto;
+}
+
+@media (min-width: 48rem) {
+	.site-container {
+		inline-size: min(
+			calc(100% - (2 * var(--container-gutter-tablet))),
+			var(--container-max)
+		);
+	}
 }
