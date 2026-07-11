@@ -16,4 +16,52 @@ const homeFooterContent = {
 <Layout title="Audiophile">
 	<Welcome />
 	<SiteFooter {...homeFooterContent} />
+import SecondaryProductBanner from '../components/SecondaryProductBanner.astro';
+import { secondaryProductBannerReference } from '../data/secondary-product-banner';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+	title="Audiophile"
+	description="Audiophile premium audio products"
+>
+	<main class="home-page">
+		<h1 class="visually-hidden">Audiophile</h1>
+		<div class="site-container">
+			<SecondaryProductBanner
+				{...secondaryProductBannerReference}
+				headingLevel={2}
+				imagePriority="high"
+			/>
+
+		</div>
+	</main>
 </Layout>
+
+<style>
+	.home-page {
+		display: grid;
+		align-items: center;
+		min-block-size: 100dvb;
+		padding-block: 3rem;
+
+	}
+
+	.visually-hidden {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		border: 0;
+		white-space: nowrap;
+	}
+
+	@media (min-width: 64rem) {
+		.home__content {
+			gap: 10.5rem;
+		}
+	}
+</style>

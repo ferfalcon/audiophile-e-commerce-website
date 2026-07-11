@@ -1,0 +1,207 @@
+---
+import type {
+	SecondaryProductBannerContent,
+	SecondaryProductBannerHeadingLevel,
+	SecondaryProductBannerImage,
+} from '../data/secondary-product-banner';
+
+interface Props extends SecondaryProductBannerContent {
+	class?: string;
+	imagePriority?: 'normal' | 'high';
+}
+
+const {
+	title: rawTitle,
+	ctaLabel: rawCtaLabel,
+	ctaUrl: rawCtaUrl,
+	image,
+	tabletImage,
+	desktopImage,
+	imageAlt = '',
+	ctaAccessibleLabel,
+	headingLevel = 2,
+	class: className,
+	imagePriority = 'normal',
+} = Astro.props;
+
+const fail = (field: string): never => {
+	throw new Error(`SecondaryProductBanner: invalid ${field}`);
+};
+
+const trimString = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
+const title = trimString(rawTitle);
+const ctaLabel = trimString(rawCtaLabel);
+const ctaUrl = trimString(rawCtaUrl);
+
+const isValidImage = (value: SecondaryProductBannerImage | undefined): boolean =>
+	Boolean(
+		value &&
+			typeof value.src === 'string' &&
+			value.src.trim() &&
+			typeof value.width === 'number' &&
+			Number.isFinite(value.width) &&
+			value.width > 0 &&
+			typeof value.height === 'number' &&
+			Number.isFinite(value.height) &&
+			value.height > 0,
+	);
+
+if (!title) fail('title');
+if (!ctaLabel) fail('ctaLabel');
+if (!ctaUrl || !/^\/(?!\/)[^\s\\]*$/.test(ctaUrl)) fail('ctaUrl');
+if (!isValidImage(image)) fail('image');
+if (!isValidImage(tabletImage)) fail('tabletImage');
+if (!isValidImage(desktopImage)) fail('desktopImage');
+if (typeof imageAlt !== 'string') fail('imageAlt');
+if (ctaAccessibleLabel !== undefined && typeof ctaAccessibleLabel !== 'string') {
+	fail('ctaAccessibleLabel');
+}
+
+const validHeadingLevels: readonly SecondaryProductBannerHeadingLevel[] = [1, 2, 3, 4, 5, 6];
+if (!validHeadingLevels.includes(headingLevel)) fail('headingLevel');
+if (imagePriority !== 'normal' && imagePriority !== 'high') fail('imagePriority');
+
+const Heading = `h${headingLevel}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+const accessibleCtaLabel = trimString(ctaAccessibleLabel) || `${ctaLabel} — ${title}`;
+const isHighPriority = imagePriority === 'high';
+const loading = isHighPriority ? 'eager' : 'lazy';
+const decoding = isHighPriority ? 'sync' : 'async';
+const fetchPriority = isHighPriority ? 'high' : undefined;
+---
+
+<section class:list={['secondary-product-banner', className]}>
+	<picture class="secondary-product-banner__media">
+		<source
+			media="(min-width: 64rem)"
+			srcset={desktopImage.src}
+			width={desktopImage.width}
+			height={desktopImage.height}
+		/>
+		<source
+			media="(min-width: 48rem)"
+			srcset={tabletImage.src}
+			width={tabletImage.width}
+			height={tabletImage.height}
+		/>
+		<img
+			class="secondary-product-banner__image"
+			src={image.src}
+			width={image.width}
+			height={image.height}
+			alt={imageAlt}
+			loading={loading}
+			decoding={decoding}
+			fetchpriority={fetchPriority}
+		/>
+	</picture>
+
+	<div class="secondary-product-banner__content">
+		<Heading class="secondary-product-banner__title">{title}</Heading>
+		<a class="secondary-product-banner__cta" href={ctaUrl} aria-label={accessibleCtaLabel}>
+			{ctaLabel}
+		</a>
+	</div>
+</section>
+
+<style>
+	.secondary-product-banner {
+		--secondary-banner-content-inset: 1.5rem;
+
+		position: relative;
+		isolation: isolate;
+		display: grid;
+		align-items: center;
+		min-block-size: 20rem;
+		padding-block: 2rem;
+		border-radius: var(--radius-card);
+		background: var(--color-surface-muted);
+	}
+
+	.secondary-product-banner__media {
+		position: absolute;
+		z-index: 0;
+		inset: 0;
+		overflow: hidden;
+		border-radius: inherit;
+	}
+
+	.secondary-product-banner__image {
+		inline-size: 100%;
+		block-size: 100%;
+		max-inline-size: none;
+		object-fit: cover;
+		object-position: left center;
+	}
+
+	.secondary-product-banner__content {
+		position: relative;
+		z-index: 1;
+		display: grid;
+		justify-items: start;
+		inline-size: min(
+			14rem,
+			calc(100% - var(--secondary-banner-content-inset) - 1rem)
+		);
+		margin-inline-start: var(--secondary-banner-content-inset);
+		gap: 2rem;
+	}
+
+	.secondary-product-banner__title {
+		margin: 0;
+		font-family: var(--font-family-sans);
+		font-size: 1.75rem;
+		font-weight: var(--font-weight-bold);
+		line-height: 2.375rem;
+		letter-spacing: 0.125rem;
+		text-transform: uppercase;
+		overflow-wrap: anywhere;
+	}
+
+	.secondary-product-banner__cta {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		inline-size: 10rem;
+		block-size: 3rem;
+		border: 1px solid var(--color-black);
+		font-family: var(--font-family-sans);
+		font-size: 0.8125rem;
+		font-weight: var(--font-weight-bold);
+		line-height: 1;
+		letter-spacing: 0.0625rem;
+		text-align: center;
+		text-decoration: none;
+		text-transform: uppercase;
+		white-space: nowrap;
+		background: transparent;
+	}
+
+	.secondary-product-banner__cta:hover,
+	.secondary-product-banner__cta:active {
+		color: var(--color-white);
+		background: var(--color-black);
+	}
+
+	.secondary-product-banner__cta:focus-visible {
+		outline: var(--focus-ring-width) solid var(--focus-ring-color-light);
+		outline-offset: var(--focus-ring-offset);
+	}
+
+	@media (min-width: 48rem) {
+		.secondary-product-banner {
+			--secondary-banner-content-inset: 3.875rem;
+		}
+	}
+
+	@media (min-width: 64rem) {
+		.secondary-product-banner {
+			--secondary-banner-content-inset: 5.9375rem;
+		}
+	}
+
+	@media (forced-colors: active) {
+		.secondary-product-banner__cta:focus-visible {
+			outline-color: Highlight;
+		}
+	}
+</style>

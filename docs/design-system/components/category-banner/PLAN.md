@@ -4,7 +4,7 @@ This plan describes how to implement the category banner specified in [`DESIGN.m
 
 The target is a data-driven, server-rendered component with no client-side JavaScript. The result must remain portable enough to become a WordPress theme partial later.
 
-## Current State
+## Pre-implementation Baseline
 
 The Astro application is still the default starter:
 
@@ -15,6 +15,18 @@ The Astro application is still the default starter:
 - No automated visual or component test suite is configured.
 
 The implementation therefore needs a small foundations step before the component can be validated accurately.
+
+## Resolved Implementation Decisions
+
+- Use an inline-size container query so the module responds to its rendered width rather than the viewport.
+- Switch to the three-column compact treatment at 43rem (688px) and the expanded treatment at 58rem (928px).
+- Treat the documented 217px and 284px frames as minimum heights. Text growth may increase the surface and frame without overlap.
+- Use measured compact product-image widths of 140px for headphones, 150px for speakers, and 180px for earphones. Use a shared 220px expanded width and keep these asset-specific corrections internal to component CSS.
+- Self-host the Google Fonts v20 Latin Manrope variable WOFF2 for weights 200–800, with its OFL license and source checksum committed alongside it.
+- Use 55% black for the default action label, `#AD521B` for small hover/focus text on the light surface, and retain `#D87D4A` for the decorative arrow.
+- Keep the current-category treatment semantic-only through `aria-current="page"`.
+- Default to lazy-loaded category artwork, use asynchronous decoding, and omit `fetchpriority` because this module normally follows the page hero. Allow the consuming page to request eager loading when the banner is temporarily the first visible module.
+- Retain the stacked layout as the functional fallback when container queries are unavailable.
 
 ## Planned File Changes
 
@@ -28,7 +40,9 @@ The implementation therefore needs a small foundations step before the component
 | `frontend/src/pages/design-system/category-banner.astro` | Add an isolated review route |
 | `frontend/public/assets/shared/desktop/image-category-thumbnail-*.png` | Copy the three category product images |
 | `frontend/public/assets/shared/desktop/icon-arrow-right.svg` | Copy the existing arrow icon |
-| `frontend/public/assets/fonts/` | Add approved self-hosted Manrope font files when available |
+| `frontend/public/assets/fonts/manrope-latin-variable.woff2` | Add the approved self-hosted Manrope variable web font |
+| `frontend/public/assets/fonts/OFL.txt` | Include the font's SIL Open Font License |
+| `frontend/public/assets/fonts/SOURCE.md` | Record the font artifact URL, checksum, subset, and license source |
 
 The starter `Welcome.astro` and the home route should remain unchanged until home-page assembly begins.
 
@@ -43,6 +57,7 @@ Initial tokens:
 ```css
 :root {
 	--color-primary: #d87d4a;
+	--color-primary-text: #ad521b;
 	--color-primary-hover: #fbaf85;
 	--color-black: #000;
 	--color-surface-muted: #f1f1f1;
@@ -50,7 +65,7 @@ Initial tokens:
 	--radius-card: 0.5rem;
 	--container-max: 69.375rem;
 	--container-gutter-mobile: 1.5rem;
-	--container-gutter-tablet: 2.4375rem;
+	--container-gutter-tablet: 2.46875rem;
 }
 ```
 
@@ -58,10 +73,10 @@ The values correspond to:
 
 - Maximum desktop content width: 1110px.
 - Mobile gutter: 24px.
-- Tablet gutter: 39px.
+- Tablet gutter: 39.5px.
 - Card radius: approximately 8px.
 
-Add shared focus-ring variables once the site-wide focus treatment is selected. Avoid introducing component-specific duplicates of global colors or typography values.
+Use a 3px black focus ring with a 4px offset on this light component. Avoid introducing component-specific duplicates of global colors or typography values.
 
 ### 2. Add global styles
 
@@ -71,23 +86,18 @@ Create `frontend/src/styles/global.css` with:
 - Body margin reset.
 - Manrope as the primary font family.
 - Default page and text colors.
-- Block-level responsive image defaults.
 - Shared centered-container behavior.
 - Responsive container gutters.
-- Sensible link and list resets that do not remove accessibility affordances.
+
+Keep image, link, and list normalization scoped to `CategoryBanner.astro` so these foundations do not unexpectedly change unrelated starter components.
 
 Import the global stylesheet once from `Layout.astro`. Component-specific layout rules must remain scoped within `CategoryBanner.astro`.
 
 ### 3. Add Manrope
 
-Use approved self-hosted WOFF2 files for the weights needed by this component:
+Use the Google Fonts v20 Latin variable WOFF2 artifact for the 200–800 weight range. Store it as `frontend/public/assets/fonts/manrope-latin-variable.woff2`, add the OFL license and source metadata beside it, and verify SHA-256 `a30ddcd349703aff7464c34bef3fffdff405ee50c113440d7c8693c02d210972`.
 
-- `500` for body/system use.
-- `700` for category names and action labels.
-
-Add the font files under `frontend/public/assets/fonts/` and declare them with `@font-face` in the global foundation layer. Use `font-display: swap`.
-
-Manrope is not currently present in the repository. Pixel-accurate typography validation should be considered incomplete until the approved font files or another approved loading strategy is available.
+Declare the font with `font-display: swap`, preload the single WOFF2 from `Layout.astro`, and apply `font-size-adjust: from-font` so fallback text remains visually stable while the font loads.
 
 ## Phase 2: Prepare Component Assets
 
@@ -160,12 +170,14 @@ Suggested API:
 interface Props {
 	items: readonly CategoryBannerItem[];
 	ariaLabel?: string;
+	imageLoading?: 'eager' | 'lazy';
 }
 ```
 
 Behavior:
 
 - Default `ariaLabel` to `Product categories`.
+- Default `imageLoading` to `lazy`; use `eager` only when the banner is above the fold and no hero precedes it.
 - Accept the collection from the consuming page.
 - Avoid assuming exactly three items in the markup, even though the documented visual composition targets three.
 - Add `aria-current="page"` when an item's `current` property is true.
@@ -207,8 +219,8 @@ Base layout:
 
 - One grid column.
 - Width controlled by the shared page container.
-- 217px item frame height.
-- 165px gray surface height.
+- 217px minimum item frame height.
+- 165px minimum gray surface height.
 - Gray surface aligned to the bottom of the item frame.
 - 52px between the item top and the gray surface top.
 - 16px vertical gap between item frames.
@@ -230,12 +242,12 @@ Do not implement the mobile layout as a carousel or horizontal scroller.
 
 ## Phase 7: Add the Tablet Layout
 
-At the shared tablet breakpoint, initially proposed as `48rem`:
+When the category-banner container reaches `43rem` (688px):
 
 - Change the list to three equal columns.
 - Use a 10px column gap.
-- Retain the compact 217px item height.
-- Retain the 165px surface height.
+- Retain the compact 217px minimum item height.
+- Retain the 165px minimum surface height.
 - Retain the 52px surface top offset.
 - Reduce the product artwork proportionally without changing its source or crop.
 
@@ -255,11 +267,11 @@ Avoid fixed column widths so the layout can interpolate without overflow between
 
 ## Phase 8: Add the Desktop Layout
 
-At the shared desktop breakpoint, initially proposed as `64rem`:
+When the category-banner container reaches `58rem` (928px):
 
 - Increase the column gap to 30px.
-- Increase each item frame to 284px.
-- Increase the surface height to 204px.
+- Increase each minimum item frame to 284px.
+- Increase the minimum surface height to 204px.
 - Increase the surface top offset to 80px.
 - Increase product artwork scale.
 - Adjust title/action spacing to match the expanded composition.
@@ -272,11 +284,11 @@ At the 1110px maximum container width:
 
 The component should stop growing at the shared maximum width and remain centered.
 
-The proposed 48rem and 64rem breakpoints are initial implementation decisions. Adjust them only if intermediate-width testing shows content compression, overlap, or a premature change in composition.
+These thresholds are component-width decisions. The base stacked layout remains usable if container queries are unavailable.
 
 ## Phase 9: Tune Product Artwork
 
-The three PNG files share a 438px canvas width but have different intrinsic heights and transparent bounds. Start with one shared compact image width and one shared desktop image width.
+The three PNG files share a 438px canvas width but have different intrinsic heights and transparent bounds. Use the measured compact widths of 140px for headphones, 150px for speakers, and 180px for earphones. Use 220px for all three in the expanded treatment.
 
 Compare each rendered product against the references for:
 
@@ -299,8 +311,8 @@ Do not scatter category-name selectors throughout the stylesheet. Keep visual co
 Implement these states on the single category link:
 
 - The complete card acts as the pointer and touch target.
-- The `Shop` text changes to `#D87D4A` on hover.
-- The arrow remains orange in its default state.
+- The `Shop` text changes to the accessible light-surface accent `#AD521B` on hover and keyboard focus.
+- The decorative arrow remains `#D87D4A` in its default state.
 - `:focus-visible` draws a clear, non-color-only focus indicator around the actionable item.
 - A current category exposes `aria-current="page"`.
 - The effective interactive target exceeds 44 × 44px.
@@ -398,13 +410,11 @@ The implementation is complete when:
 - `pnpm build` passes.
 - The component can later be added to the home route without changing its internal markup or data contract.
 
-## Open Decisions During Implementation
+## Adopted Decisions
 
-- Approved Manrope font source and files.
-- Final shared breakpoint thresholds after intermediate-width review.
-- Exact compact and desktop product-image rendering dimensions.
-- Any category-specific artwork alignment corrections.
-- The final site-wide focus-ring token.
-- Whether the current category needs a persistent visual treatment in addition to `aria-current`.
-
-Resolve these during implementation using the component references and record any adopted shared tokens in the repository-level design documentation.
+- Manrope source: self-hosted Google Fonts v20 Latin variable WOFF2 with its OFL license and checksum metadata.
+- Responsive thresholds: 43rem compact-row and 58rem expanded container queries.
+- Product rendering widths: 140px/150px/180px compact for headphones/speakers/earphones and 220px expanded, stored as internal asset-specific CSS variables rather than business data.
+- Focus treatment: 3px black outline with a 4px offset.
+- Current category: `aria-current="page"` without an invented persistent visual state.
+- Text resilience: documented card dimensions are minimum heights so enlarged or localized labels can grow safely.
