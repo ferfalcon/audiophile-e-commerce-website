@@ -1,11 +1,42 @@
 ---
-import Welcome from '../components/Welcome.astro';
+import SecondaryProductBanner from '../components/SecondaryProductBanner.astro';
+import { secondaryProductBannerReference } from '../data/secondary-product-banner';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
-<Layout>
-	<Welcome />
+<Layout
+	title="Audiophile"
+	description="Audiophile premium audio products"
+>
+	<main class="home-page">
+		<h1 class="visually-hidden">Audiophile</h1>
+		<div class="site-container">
+			<SecondaryProductBanner
+				{...secondaryProductBannerReference}
+				headingLevel={2}
+				imagePriority="high"
+			/>
+		</div>
+	</main>
 </Layout>
+
+<style>
+	.home-page {
+		display: grid;
+		align-items: center;
+		min-block-size: 100dvb;
+		padding-block: 3rem;
+	}
+
+	.visually-hidden {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: clip;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
+	}
+</style>

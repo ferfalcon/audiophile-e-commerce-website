@@ -1,0 +1,62 @@
+@import './tokens.css';
+
+@font-face {
+	font-family: 'Manrope';
+	font-style: normal;
+	font-weight: 200 800;
+	font-display: swap;
+	src: url('/assets/fonts/manrope-latin-variable.woff2') format('woff2');
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+		U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+		U+FEFF, U+FFFD;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	min-inline-size: 20rem;
+	font-family: var(--font-family-sans);
+	font-size-adjust: from-font;
+	color: var(--color-black);
+	background: var(--color-page);
+}
+
+body {
+	min-block-size: 100vh;
+	margin: 0;
+}
+
+picture,
+img {
+	display: block;
+}
+
+img {
+	max-inline-size: 100%;
+}
+
+a {
+	color: inherit;
+}
+
+.site-container {
+	inline-size: min(
+		calc(100% - (2 * var(--container-gutter-mobile))),
+		var(--container-max)
+	);
+	margin-inline: auto;
+}
+
+@media (min-width: 48rem) {
+	.site-container {
+		inline-size: min(
+			calc(100% - (2 * var(--container-gutter-tablet))),
+			var(--container-max)
+		);
+	}
+}
